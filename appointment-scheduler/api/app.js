@@ -1,4 +1,4 @@
-var createError = require('http-errors');
+var createError = require("http-errors");
 const express = require("express");
 const path = require("path");
 const cookieParser = require("cookie-parser");
@@ -9,13 +9,21 @@ const mongoose = require("mongoose");
 
 const index = require("./routes/index");
 const api = require("./routes/api/index");
+const db = require("../config/keys").mongoURI;
+
+var app = express();
 
 mongoose.Promise = global.Promise;
 
+//Connect to MongoDB//
+mongoose.connect(db, { useNewUrlParser: true }
+  )
+  .then(() => console.log("MongoDB successfully connected"))
+  .catch(err => console.log(err));
 
 const MongoClient = require('mongodb').MongoClient;
 const uri = "mongodb+srv://Brendan:Virginia1527@cluster0-1lem4.mongodb.net/test?retryWrites=true&w=majority";
-const client = new MongoClient(uri, { useNewUrlParser: true });
+const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true});
 client.connect(err => {
   const collection = client.db("test").collection("devices");
   // perform actions on the collection object
@@ -38,7 +46,7 @@ app.all("/*", function(req, res, next){
   }
 });
 
-//var app = express();
+
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
@@ -48,13 +56,13 @@ app.set("view engine", "ejs");
 app.use(logger("dev"));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-//app.use(express.json());
-//app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/", index);
-app.use("/api", api);
+app.use("/api/appointmentCreate", appointmentCreate);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
